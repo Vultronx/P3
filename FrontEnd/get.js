@@ -1,31 +1,22 @@
 //Récupération des projets et affichage dans le DOM au format texte
 async function get() {
+    //récupération des travaux sur le serveur
     const response = await fetch("http://localhost:5678/api/works");
     const worksJson = await response.json();
-
-    //initialisation d'un tableau qui contiendra les éléments de la galerie
-    const galleryElement = [worksJson.length];
 
     //reinitialisation de la galerie
     const galleryClass = document.querySelector(".gallery");
     galleryClass.innerHTML = "";
 
+    //boucle permettant l'ajout des projets du JSON dans la galerie
     let i = 0;
     while (i < worksJson.length) {
         addWork(galleryClass, worksJson[i])
         i++;
     }
-
-    /*
-    //Affichage du contenu de WorksJson
-    console.log(worksJson);
-    const worksString = JSON.stringify(worksJson);
-    document.getElementById("portfolio").innerHTML = 
-    "Type de la variable : " + typeof(worksString) + "<br>Contenu de la variable : " + worksString;
-    */
-
 };
 
+//function permettant l'ajout d'un projet dans la galerie
 function addWork(parentClass, workJson) {
     //déclaration des éléments à ajouter dans la galerie
     let figureElement = document.createElement("figure");
@@ -37,9 +28,11 @@ function addWork(parentClass, workJson) {
     imageElement.alt = workJson.title;
     figcaptionElement.innerHTML = workJson.title;
 
-    //Ajout des éléments dans la galerie
+    //ajout des éléments image et figcaption dans l'élément figure
     figureElement.appendChild(imageElement);
     figureElement.appendChild(figcaptionElement);
+
+    //ajout des éléments dans la galerie
     parentClass.appendChild(figureElement);
 };
 
