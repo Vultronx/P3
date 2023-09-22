@@ -1,8 +1,17 @@
-//Récupération des projets et affichage dans le DOM au format texte
-async function get() {
+//Récupération des projets et affichage dans le DOM
+//le paramètre attendu est un entier correspondant à l'ID de la catégorie souhaitée
+//par defaut, categorieID = 0. Affichage de tous les projets si aucune valeur n'a été renseignée
+async function get(categorieID = 0) {
     //récupération des travaux sur le serveur
-    const response = await fetch("http://localhost:5678/api/works");
-    const worksJson = await response.json();
+    const worksResponse = await fetch("http://localhost:5678/api/works");
+    const worksJson = await worksResponse.json();
+
+    //Récupération des catégories sur le serveur
+    const categoriesResponse = await fetch("http://localhost:5678/api/categories");
+    const categoriesJson = await categoriesResponse.json();
+
+    //Affichage temporaire des catégories dans la console
+    console.log(categoriesJson);
 
     //reinitialisation de la galerie
     const galleryClass = document.querySelector(".gallery");
@@ -11,9 +20,11 @@ async function get() {
     //boucle permettant l'ajout des projets du JSON dans la galerie
     let i = 0;
     while (i < worksJson.length) {
-        addWork(galleryClass, worksJson[i])
+        if (worksJson[i].category.id == categorieID || categorieID == 0) {
+            addWork(galleryClass, worksJson[i]);
+        }
         i++;
-    }
+    };
 
     /************************ Récupérer les catégories et mettre en place la barre de filtre ************************/
     //dans le JSON les projets sont classés par catégories identifiables par un ID dans la propriété "categoryId"
