@@ -123,15 +123,17 @@ li:hover {
 }
 #portfolio h2 {
 	text-align: center;
-	margin-bottom: 1em;
+	margin-bottom: 2em;
 }
 
-#portfolio .filterbar {
+#portfolio .categories {
 	display: flex;
 	justify-content: center;
+
+	margin-bottom: 60px;
 }
 
-.filterbar .button {
+.categories .button {
     width: auto;
 	min-width: 90px;
 	height: 42px;
@@ -147,13 +149,13 @@ li:hover {
 	color: #1D6154;
 	background-color: white;
 	
-	margin: 30px 5px 60px 5px;
+	margin: 0px 5px 0px 5px;
     padding: 0px 14px 0px 14px;
 	border-radius: 42px;
 	border: 1px solid;
 }
 
-.filterbar .button:hover {
+.categories .button:hover {
 	color: white;
 	background-color: #1D6154;
 }
