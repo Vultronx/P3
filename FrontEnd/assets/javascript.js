@@ -1,7 +1,7 @@
 //Récupération des projets et affichage dans le DOM
 //le paramètre attendu est un entier correspondant à l'ID de la catégorie souhaitée
 //par defaut, categorieID = 0. Affichage de tous les projets si aucune valeur n'a été renseignée
-async function appendCategoriesAndWorks(categorieID = 0) {
+async function appendCategoriesAndWorks(categoryId = 0) {
     //récupération des travaux sur le serveur
     const worksResponse = await fetch("http://localhost:5678/api/works");
     const worksJson = await worksResponse.json();
@@ -10,18 +10,20 @@ async function appendCategoriesAndWorks(categorieID = 0) {
     const categoriesResponse = await fetch("http://localhost:5678/api/categories");
     const categoriesJson = await categoriesResponse.json();
 
-    //reinitialisation des catégories
-    const categoriesClass = document.querySelector(".categories");
-    categoriesClass.innerHTML = "";
+    //Catégories
+    //reinitialisation de la barre de filtre
+    const filterbarClass = document.querySelector(".filterbar");
+    filterbarClass.innerHTML = "";
 
     //ajout des catégories dans la barre de filtre
-    appendCategorie(categoriesClass, {id: 0, name: 'Tous'});
+    appendCategory(filterbarClass, {id: 0, name: 'Tous'});
     let i = 0;
     while (i < categoriesJson.length) {
-        appendCategorie(categoriesClass, categoriesJson[i]);
+        appendCategory(filterbarClass, categoriesJson[i]);
         i++;
     };
     
+    //Galerie
     //reinitialisation de la galerie
     const galleryClass = document.querySelector(".gallery");
     galleryClass.innerHTML = "";
@@ -29,17 +31,11 @@ async function appendCategoriesAndWorks(categorieID = 0) {
     //ajout des projets dans la galerie
     i = 0;
     while (i < worksJson.length) {
-        if (worksJson[i].category.id == categorieID || categorieID == 0) {
+        if (worksJson[i].category.id == categoryId || categoryId == 0) {
             appendWork(galleryClass, worksJson[i]);
         }
         i++;
     };
-
-    /************************ Récupérer les catégories et mettre en place la barre de filtre ************************/
-    //dans le JSON, les projets sont classés par catégories identifiables par un ID dans la propriété "categoryId"
-    //faire un fetch sur l'adresse http://localhost:5678/api/categories afin de récupérer les catégories classées par ID
-    //j'affiche ensuite les catégories sous forme de boutons filtres. Exemple : | Tous | categoryId | categoryId | categoryId | ... |
-    //j'affiche ensuite les projets de la catégorie filtrée
 };
 
 //function permettant l'ajout d'un projet dans la galerie
@@ -62,24 +58,25 @@ function appendWork(gallery, work) {
     gallery.appendChild(figureElement);
 };
 
-//function permettant l'ajout d'une catégorie dans la barre de filtre
-function appendCategorie(filterbar, categorie) {
-    //déclaration des éléments à ajouter dans la barre de filtre
+//function permettant l'ajout d'une catégorie
+function appendCategory(filterbar, category) {
+    //déclaration des éléments à ajouter
     let pElement = document.createElement("p");
     let divElement = document.createElement("div");
 
     //définition du contenu des éléments
-    pElement.innerHTML = categorie.name;
+    pElement.innerHTML = category.name;
     divElement.className = "button";
     divElement.addEventListener("click",  () => {
-        appendCategoriesAndWorks(categorie.id);
+        appendCategoriesAndWorks(category.id);
     });
 
     //ajout de l'élément p dans l'élément div
     divElement.appendChild(pElement);
     
-    //ajout des éléments dans la barre de filtre
+    //ajout des éléments dans la barre des catégories
     filterbar.appendChild(divElement);
 };
 
+//récupération des catégories et des travaux
 appendCategoriesAndWorks();
