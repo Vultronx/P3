@@ -12,7 +12,7 @@
     const WORKS_JSON = await WORKS_RESPONSE.json();
  
     //déclaration d'un pointeur sur la barre de filtre
-    const filterbarClass = document.querySelector(".filterbar");   
+    const filterbarClass = document.querySelector(".filterbar");
 
     //reinitialisation de la barre de filtre
     //filterbarClass.innerHTML = "";
@@ -121,7 +121,7 @@
                 //mainElement.style.display = "block";
                 portfolioElement.style.display = "block";
                 footerElement.style.display = "block";
-                introductionElement.style.display = "block";
+                introductionElement.style.display = "flex";
                 contactElement.style.display = "block";
                 loginSectionElement.style.display = "none";
             });
@@ -130,6 +130,5 @@
 
         }
     };
+    this.menu.init();
 })();
-
-sbScript.menu.init();
