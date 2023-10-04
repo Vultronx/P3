@@ -13,26 +13,32 @@
 </head>
 <body>
 <header>
-	<h1>Sophie Bluel <span>Architecte d'inteérieur</span></h1>
-	<nav>
-		<ul>
-			<li class="works">projets</li>
-			<li>contact</li>
-			<li class="login">login</li>
-			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
-		</ul>
-	</nav>
+	<div class="editor-bar">
+		<p>[o]&nbsp;</p><p>Mode édition</p>
+	</div>
+	<div class="header-bar">
+		<h1>Sophie Bluel <span>Architecte d'inteérieur</span></h1>
+		<nav>
+			<ul>
+				<li class="works">projets</li>
+				<li><a href="#contact">contact</a></li>
+				<li class="login">login</li>
+				<li class="logout">logout</li>
+				<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
+			</ul>
+		</nav>
+	</div>
 </header>
 <main>
 	<section id="login">
 		<h2>Log In</h2>
-		<form action="#" method="post">
-			<label for="email">E-mail</label>
-			<input type="email" name="email" id="email">
+		<form id="login-form" action="#" method="post">
+			<label for="id">E-mail</label>
+			<input type="email" name="id" id="id" required>
 			<label for="password">Mot de passe</label>
-			<input type="password" name="password" id="password">
+			<input type="password" name="password" id="password" required>
 			<input type="submit" value="Se connecter">
-			<a>Mot de passe oublié</a>
+			<a href="#">Mot de passe oublié</a>
 		</form>
 	</section>
 	<section id="introduction">
@@ -47,7 +53,10 @@
 		</article>
 	</section>
 	<section id="portfolio">
-		<h2>Mes Projets</h2>
+		<div class="portfolio-header">
+			<h2>Mes Projets</h2>
+			<p class="button-editor">[o]&nbsp;modifier</p>
+		</div>
 		<div class="filterbar">
 		</div>
 		<div class="gallery">
