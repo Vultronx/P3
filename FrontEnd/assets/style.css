@@ -239,11 +239,24 @@ a:hover {
 	font-size: 1.2em;
 	border: none;
 	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	cursor: pointer;
+}
+
+#contact input[type="submit"] {
+	font-family: 'Syne';
+	font-weight: 700;
+	font-size: 14px;
+	color: white;
+	background-color: #1D6154;
+	margin : 2em auto ;
+	width: 180px;
+	height: 36px;
+	text-align: center;
+	border-radius: 60px ;
 }
 
 #contact input[type="submit"]:hover {
 	background-color: #0E2F28;
-	cursor: pointer;
 }
 
 #contact label {
@@ -357,7 +370,7 @@ footer nav ul {
 	width: 540px;
 	height: auto;
 	background-color: #fefefe;
-	margin: auto;
+	margin: 150px auto;
 	padding: 32px;
 	padding-top: 20px;
 	border-radius: 8px;
