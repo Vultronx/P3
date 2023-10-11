@@ -3,35 +3,42 @@
 //par defaut, categorieID = 0. Affichage de tous les projets si aucune valeur n'a été renseignée
 (async function sbScript() {
 
+    //racine du script
     const root = this;
+
+    //projets au format JSON
+    this.Works_JSON = null;
+    //catégories au format JSON
+    this.Category_JSON = null;
+
     //Récupération des catégories sur le serveur    
     const CATEGORIES_RESPONSE = await fetch("http://localhost:5678/api/categories");
     const CATEGORIES_JSON = await CATEGORIES_RESPONSE.json();
 
     //récupération des travaux sur le serveur    
     const WORKS_RESPONSE = await fetch("http://localhost:5678/api/works");
-    const WORKS_JSON = await WORKS_RESPONSE.json();
+    let WORKS_JSON = await WORKS_RESPONSE.json();
  
     //déclaration d'un pointeur sur la barre de filtre
-    const filterbarClass = document.querySelector(".filterbar");
-
-    //reinitialisation de la barre de filtre
-    //filterbarClass.innerHTML = "";
+    const filterbar = document.querySelector(".filterbar");
+    this.worksManageModal = document.getElementById("works-manage");
+    this.worksAddModal = document.getElementById("works-add");
+    
 
     //ajout des catégories dans la barre de filtre
-    appendCategories(filterbarClass);
+    appendCategories(filterbar);
 
     //ajout des projets dans la galerie par catégories
     appendWorks(WORKS_JSON, 0); //0 = tous
 
     //ajout des catégories dans la barre de filtre
-    function appendCategories(filterbarClass) {
+    function appendCategories(filterbar) {
         
         //ajout des catégories dans la barre de filtre
-        appendCategory(filterbarClass, {id: 0, name: 'Tous'});
+        appendCategory(filterbar, {id: 0, name: 'Tous'});
         let i = 0;
         while (i < CATEGORIES_JSON.length) {
-            appendCategory(filterbarClass, CATEGORIES_JSON[i]);
+            appendCategory(filterbar, CATEGORIES_JSON[i]);
             i++;
         };
 
@@ -50,7 +57,7 @@
         i = 0;
         while (i < worksJson.length) {
             if (worksJson[i].category.id == categoryId || categoryId == 0) {
-                appendWork(galleryClass, worksJson[i]);
+                appendWork(galleryClass, worksJson[i], i);
             }
             i++;
         };
@@ -66,7 +73,7 @@
         pElement.innerHTML = category.name;
         divElement.className = "button";
         divElement.addEventListener("click",  () => {
-            appendWorks(WORKS_JSON, category.id);
+            appendWorks(this.Works_JSON, category.id);
         });
 
         //ajout de l'élément p dans l'élément div
@@ -77,7 +84,7 @@
     };
 
     //function permettant l'ajout d'un projet dans la galerie
-    function appendWork(gallery, work) {
+    function appendWork(gallery, work, i) {
         
         //déclaration des éléments à ajouter dans la galerie
         let figureElement = document.createElement("figure");
@@ -95,7 +102,76 @@
 
         //ajout des éléments dans la galerie
         gallery.appendChild(figureElement);
+
+        //création des éléments qui serviront à la gestion des projets
+        let figureOverviewElement = document.createElement("figure");
+        let imageOverviewElement = document.createElement("img");
+        let deleteButtonElement = document.createElement("img");
+        figureOverviewElement.style.display = "inline-block";
+        figureOverviewElement.style.position = "relative";
+        imageOverviewElement.src = work.imageUrl;
+        imageOverviewElement.alt = work.title;
+        deleteButtonElement.className = "deleteButton";
+        deleteButtonElement.src = "./assets/icons/delete.png";
+        deleteButtonElement.alt = "x";
+        deleteButtonElement.style.position = "absolute";
+        deleteButtonElement.style.top = "5px";
+        deleteButtonElement.style.right = "5px";
+        deleteButtonElement.style.cursor = "pointer";
+        deleteButtonElement.style.zIndex = "1";
+        deleteButtonElement.addEventListener("click", () => {
+            figureElement.remove();
+            figureOverviewElement.remove();
+        });
+        
+        const worksOverviewElement = document.querySelector(".works-manage .overview");
+        figureOverviewElement.appendChild(imageOverviewElement);
+        figureOverviewElement.appendChild(deleteButtonElement);
+        worksOverviewElement.appendChild(figureOverviewElement);
     };
+
+    this.works = {
+        init: function () {
+            const addButtonElement = document.querySelector(".works-manage .add-button");
+            const previousButtonElement = document.querySelector(".works-add .previous-button");
+            const closeButtonElement = document.querySelector(".works-add .close-button");
+            addButtonElement.addEventListener("click", () => {
+                root.worksManageModal.style.display = "none";
+                root.worksAddModal.style.display = "block";
+            });
+            previousButtonElement.addEventListener("click", () => {
+                root.worksManageModal.style.display = "block";
+                root.worksAddModal.style.display = "none";
+            });
+            closeButtonElement.addEventListener("click", () => {
+                //fermeture de la modale par appel aux nodes parents
+                closeButtonElement.parentNode.parentNode.style.display = "none";
+            });
+            this.update();
+        },
+        add: function () {
+
+        },        
+        remove: function () {
+
+        },
+        update: function () {
+            Works_JSON = this.get();
+        },
+        get: async function () {
+            //récupération des travaux sur le serveur    
+            let json = await fetch("http://localhost:5678/api/works")
+            .then((response) => {
+                if (!response.ok)
+                    console.log("Erreur lors de la récupération des travaux")
+                    return false;
+            })
+            return json;
+        }
+    };
+    
+    //initialisation des projets
+    this.works.init();
 
     this.menu = {
         init: function () {
@@ -143,17 +219,30 @@
             loginSectionElement.style.display = "block";
         },
         editorShow: function() {
+            const filterbarElement = document.querySelector(".filterbar");
             const editorBarElement = document.querySelector(".editor-bar");
+            const worksModifyButtonElement = document.querySelector(".works-modify-button");
+            const headerBarElement = document.querySelector(".header-bar");
+            filterbarElement.style.display = "none";
             editorBarElement.style.display = "flex";
+            worksModifyButtonElement.style.display = "flex";
+            headerBarElement.style.margin = "80px 0px 50px 0px";
+            
         },
         editorHide: function() {
+            const filterbarElement = document.querySelector(".filterbar");
             const editorBarElement = document.querySelector(".editor-bar");
+            const worksModifyButtonElement = document.querySelector(".works-modify-button");
+            const headerBarElement = document.querySelector(".header-bar");
+            filterbarElement.style.display = "flex";
             editorBarElement.style.display = "none";
+            worksModifyButtonElement.style.display = "none";
+            headerBarElement.style.margin = "30px 0px 50px 0px";
         }
     };
     this.menu.init();
 
-    this.loginSubmit = {
+    this.login = {
         init: function () {
             const loginForm = document.querySelector("#login-form");
             loginForm.addEventListener("submit", async (event) => {
@@ -188,6 +277,7 @@
                     if (data.error) {
                         //console.log(data.error);/*displays error message*/
                         console.log("Utilisateur non autorisé");
+                        window.alert("Veuillez vérifier votre identifiant et/ou mot de passe");
                     } else {
                         if (data.message != "user not found") {
                             //enregistrement du token dans le localstorage
@@ -207,7 +297,8 @@
                             root.menu.editorShow();
 
                             if (data.token === token) {
-                                console.log("Mode édition confirmé !")
+                                console.log("Mode édition confirmé !");
+                                window.alert("Vous êtes connecté");
                             }
                             //si logout
                             logoutButtonElement.addEventListener("click", function () {
@@ -219,9 +310,11 @@
                                 logoutButtonElement.style.display = "none";
                                 root.menu.editorHide();
                                 console.log("Déconnecté !");
+                                window.alert("Vous êtes déconnecté");
                             });
                         } else {
                             console.log("Utilisateur inconnu");
+                            window.alert("Utilisateur inconnu");
                         }
                     }
                 })
@@ -234,7 +327,28 @@
 
         }
     };
-    this.loginSubmit.init();
+    this.login.init();
+
+    this.editor = {
+        init: function () {
+            root.worksManageModal.style.display = "none";
+            const worksModifyButton = document.querySelector(".works-modify-button");
+            worksModifyButton.addEventListener("click", function () {
+                root.worksManageModal.style.display = "block";
+            })
+            const worksModifyCloseButton = document.querySelector(".works-manage .close-button");
+            worksModifyCloseButton.addEventListener("click", function () {
+                root.worksManageModal.style.display = "none";
+            })
+        },
+        open: function () {
+
+        },
+        close: function () {
+
+        }
+    };
+    this.editor.init();
 
 })();
 //const colis = await fetch("http://api.top-livraisons.fr/colis").then(colis => colis.json());
