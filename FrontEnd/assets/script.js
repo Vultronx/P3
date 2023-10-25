@@ -413,7 +413,6 @@
         }
     };
     this.menu.init();
-    this.menu.editorShow();
 
     this.login = {
         init: function () {
@@ -519,7 +518,7 @@
             let workPicture = document.querySelector("#works-add #work-picture");
             let workTitle = document.querySelector("#works-add #work-title");
             let workCategory = document.querySelector("#works-add #work-category");
-            worksSendButton.addEventListener("click", function () {
+            worksSendButton.addEventListener("click", function () { //Faire un event "submit" au formulaire plutot qu'un event "click" sur la DIV "send-button"
                 //fetch et actualisation de la liste des projet
                 //here
                 
@@ -538,13 +537,32 @@
                     },
                     body: JSON.stringify({
                         imageUrl: workPicture.src,
-                        title: workTitle.value,
+                        title: workTitle.value, //=> valeur de l'index
                         category: workCategory.selectedIndex,
                     }),
                 });
                 pictureInputElement.value = "";
                 root.worksAddModal.style.display = "none";
             })
+            //Nouvelle version
+            worksSendForm.addEventListener("submit", function (event) {
+                
+                //on empeche le rechargement de la page
+                event.preventDefault();
+
+                let bodyForm = new FormData(event.target);
+
+                fetch("http://localhost:5678/api/works", {
+            
+                    method: "POST",
+                    headers: {
+                        "Authorisation": "Bearer"+localStorage.getItem("token"),
+                    },
+                    body: bodyForm,
+                })
+            
+            })
+
         },
         open: function () {
 
