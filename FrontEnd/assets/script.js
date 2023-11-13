@@ -131,7 +131,7 @@
         i = 0;
         while (i < worksJson.length) {
             if (worksJson[i].category.id == categoryId || categoryId == 0) {
-                appendWork(galleryClass, worksJson[i], i);
+                appendWork(galleryClass, worksJson[i]);
             }
             i++;
         };
@@ -160,14 +160,15 @@
         filterbar.appendChild(divElement);
 
         if (category.name != "Tous") {
-            optionElement.value = category.name;
+            console.log(optionElement);
+            optionElement.value = category.id;
             optionElement.innerHTML = category.name;
             categoriesSelectElement.appendChild(optionElement);
         }
     };
 
     //function permettant l'ajout d'un projet dans la galerie
-    function appendWork(gallery, work, i) {
+    function appendWork(gallery, work) {
         
         //déclaration des éléments à ajouter dans la galerie
         let figureElement = document.createElement("figure");
@@ -229,12 +230,20 @@
             addButtonElement.addEventListener("click", () => {
                 root.worksManageModal.style.display = "none";
                 root.worksAddModal.style.display = "block";
+
+                imageElement.style.display = "none";
+                pictureElement.style.display = "flex";
+                addImageButtonElement.style.display = "flex";
+                pElement.style.display = "flex";
+                pictureOverviewElement.style.padding = "16px 0px 20px 0px";
+                pictureOverviewElement.style.height = "142px";
             });
             previousButtonElement.addEventListener("click", () => {
                 const pictureOverviewElement = document.querySelector(".picture-overview");
 
                 root.worksManageModal.style.display = "block";
                 root.worksAddModal.style.display = "none";
+                root.workPicture.style.display = "none";
 
                 imageElement.style.display = "none";
                 pictureElement.style.display = "flex";
@@ -245,6 +254,8 @@
             });
             closeButtonElement.addEventListener("click", () => {
                 const pictureOverviewElement = document.querySelector(".picture-overview");
+                
+                root.workPicture.style.display = "none";
 
                 //fermeture de la modale par appel aux nodes parents
                 closeButtonElement.parentNode.parentNode.style.display = "none";
@@ -255,6 +266,9 @@
                 pElement.style.display = "flex";
                 pictureOverviewElement.style.padding = "16px 0px 20px 0px";
                 pictureOverviewElement.style.height = "142px";
+                
+                const pictureInputElement = document.getElementById("picture-input");
+                pictureInputElement.value = "";
             });
             window.onclick = function(event) {
                 if (event.target == this.worksManageModal) {
@@ -300,7 +314,7 @@
                 pictureOverviewElement.style.height = "178px";
                 pictureOverviewElement.appendChild(root.workPicture);
                 
-                pictureInputElement.value = "";
+                //pictureInputElement.value = ""; //<===== BIG BUG DE L'ENFER !!!!
 
             });
             this.update();
@@ -413,7 +427,6 @@
         }
     };
     this.menu.init();
-    this.menu.editorShow();
 
     this.login = {
         init: function () {
@@ -513,13 +526,16 @@
             worksModifyCloseButton.addEventListener("click", function () {
                 root.worksManageModal.style.display = "none";
             });
-            const pictureInputElement = document.getElementById("picture-input");
+
             const worksSendButton = document.querySelector(".works-add .send-button");
+
+            const pictureInputElement = document.getElementById("picture-input");
+            const worksSendForm = document.querySelector("#works-send-form");
             
             let workPicture = document.querySelector("#works-add #work-picture");
             let workTitle = document.querySelector("#works-add #work-title");
             let workCategory = document.querySelector("#works-add #work-category");
-            worksSendButton.addEventListener("click", function () {
+            /*worksSendButton.addEventListener("click", function () { //Faire un event "submit" au formulaire plutot qu'un event "click" sur la DIV "send-button"
                 //fetch et actualisation de la liste des projet
                 //here
                 
@@ -538,13 +554,48 @@
                     },
                     body: JSON.stringify({
                         imageUrl: workPicture.src,
-                        title: workTitle.value,
+                        title: workTitle.value, //=> valeur de l'index
                         category: workCategory.selectedIndex,
                     }),
                 });
                 pictureInputElement.value = "";
                 root.worksAddModal.style.display = "none";
-            })
+            })*/
+            //Nouvelle version
+            worksSendForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(event.target);
+
+                await fetch("http://localhost:5678/api/works", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer "+window.localStorage.getItem("token"),
+                    },
+                    body: formData,
+                })
+                .then((response) => {
+                    if (response.redirected) {
+                        console.log("redirection : "+response.url);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(data);
+                    if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                const galleryClass = document.querySelector(".gallery");
+                let response = await fetch("http://localhost:5678/api/works");
+                let json = await response.json();
+                appendWork(galleryClass, json[json.length-1]);
+                //workPicture.removeAttribute('src');
+                root.worksAddModal.style.display = "none";
+                root.workPicture.style.display = "none";
+                //worksSendForm.reset();
+            });
+
         },
         open: function () {
 

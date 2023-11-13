@@ -380,8 +380,8 @@ footer nav ul {
 	display: flex;
 	justify-content: center;
 	padding-top: 30px;
-	padding-bottom: 50px;
-	font-size: 24px;
+	padding-bottom: 10px;
+	font-size: 26px;
 }
 
 .modal .content .picture-overview {
@@ -389,7 +389,7 @@ footer nav ul {
 	height: 142px;
 	padding-top: 16px;
 	padding-bottom: 20px;
-	margin-left: 70px;
+	margin-left: 0px;
 	background-color: #E8F1F6;
 }
 
@@ -514,7 +514,6 @@ footer nav ul {
 	margin-left: 70px;
 	margin-right: 70px;
 	padding-bottom: 48px;
-	border-bottom: 1px solid #bbbbbb;
 }
 
 .modal .content form label {
@@ -528,6 +527,11 @@ footer nav ul {
 	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
 }
 
+.modal .content .line {
+	margin-top: 45px;
+	border-top: 1px solid #bbbbbb;
+}
+
 .modal .content .send-button {
 	display: flex;
 	justify-content: center;
@@ -539,9 +543,9 @@ footer nav ul {
 	font-family: 'Syne';
 	font-size: 14px;
 	margin : 0 auto;
-	margin-top: 35px;
+	margin-top: 20px;
 	margin-bottom: 10px;
-	border-radius: 24px ;
+	border-radius: 24px;
 	cursor: pointer;
 }
 
