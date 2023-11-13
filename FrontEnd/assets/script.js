@@ -131,7 +131,7 @@
         i = 0;
         while (i < worksJson.length) {
             if (worksJson[i].category.id == categoryId || categoryId == 0) {
-                appendWork(galleryClass, worksJson[i]);
+                appendWork(galleryClass, worksJson[i], worksJson[i].id);
             }
             i++;
         };
@@ -168,10 +168,11 @@
     };
 
     //function permettant l'ajout d'un projet dans la galerie
-    function appendWork(gallery, work) {
+    function appendWork(gallery, work, id) {
         
         //déclaration des éléments à ajouter dans la galerie
         let figureElement = document.createElement("figure");
+        figureElement.id = id;
         let imageElement = document.createElement("img");
         let figcaptionElement = document.createElement("figcaption");
 
@@ -203,9 +204,22 @@
         deleteButtonElement.style.right = "5px";
         deleteButtonElement.style.cursor = "pointer";
         deleteButtonElement.style.zIndex = "1";
-        deleteButtonElement.addEventListener("click", () => {
+
+        deleteButtonElement.addEventListener("click", async () => {
+
+            console.log("id : "+id);
+            //fetch pour la supression des projets
+            await fetch("http://localhost:5678/api/works/"+id, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": "Bearer "+window.localStorage.getItem("token"),
+                }
+            })
+            
+            //si la suppression est confirmé alors on valide la suppression sur le DOM
             figureElement.remove();
             figureOverviewElement.remove();
+
         });
         
         const worksOverviewElement = document.querySelector(".works-manage .overview");
