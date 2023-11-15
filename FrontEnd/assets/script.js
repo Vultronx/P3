@@ -151,86 +151,131 @@
     };
 
     (function worksManage() {
-            const addButtonElement = document.querySelector(".works-manage .add-button");
-            const previousButtonElement = document.querySelector(".works-add .previous-button");
-            const closeButtonElement = document.querySelector(".works-add .close-button");
+        const addButtonElement = document.querySelector(".works-manage .add-button");
+        const previousButtonElement = document.querySelector(".works-add .previous-button");
+        const closeButtonElement = document.querySelector(".works-add .close-button");
 
-            const pictureElement = document.querySelector(".picture");
-            const addImageButtonElement = document.querySelector(".add-image-button");
-            const pElement = document.querySelector(".picture-overview p");
+        const pictureElement = document.querySelector(".picture");
+        const addImageButtonElement = document.querySelector(".add-image-button");
+        const pElement = document.querySelector(".picture-overview p");
 
-            addButtonElement.addEventListener("click", () => {
-                const pictureOverviewElement = document.querySelector(".picture-overview");
+        addButtonElement.addEventListener("click", () => {
+            const pictureOverviewElement = document.querySelector(".picture-overview");
 
+            root.worksManageModal.style.display = "none";
+            root.worksAddModal.style.display = "block";
+
+            pictureElement.style.display = "flex";
+            addImageButtonElement.style.display = "flex";
+            pElement.style.display = "flex";
+            pictureOverviewElement.style.padding = "16px 0px 20px 0px";
+            pictureOverviewElement.style.height = "142px";
+
+            resetAddWorkForm();
+        });
+        previousButtonElement.addEventListener("click", () => {
+            root.worksManageModal.style.display = "block";
+            root.worksAddModal.style.display = "none";
+            root.workPicture.style.display = "none";
+        });
+        closeButtonElement.addEventListener("click", () => {                
+            root.workPicture.style.display = "none";
+            //fermeture de la modale par appel aux nodes parents
+            closeButtonElement.parentNode.parentNode.style.display = "none";
+        });
+        window.onclick = function(event) {
+            if (event.target == this.worksManageModal) {
                 root.worksManageModal.style.display = "none";
-                root.worksAddModal.style.display = "block";
-
-                pictureElement.style.display = "flex";
-                addImageButtonElement.style.display = "flex";
-                pElement.style.display = "flex";
-                pictureOverviewElement.style.padding = "16px 0px 20px 0px";
-                pictureOverviewElement.style.height = "142px";
-
-                resetAddWorkForm();
-            });
-            previousButtonElement.addEventListener("click", () => {
-                root.worksManageModal.style.display = "block";
+            } else if (event.target == this.worksAddModal) {
                 root.worksAddModal.style.display = "none";
                 root.workPicture.style.display = "none";
-            });
-            closeButtonElement.addEventListener("click", () => {                
-                root.workPicture.style.display = "none";
-                //fermeture de la modale par appel aux nodes parents
-                closeButtonElement.parentNode.parentNode.style.display = "none";
-            });
-            window.onclick = function(event) {
-                if (event.target == this.worksManageModal) {
-                    root.worksManageModal.style.display = "none";
-                } else if (event.target == this.worksAddModal) {
-                    root.worksAddModal.style.display = "none";
-                    root.workPicture.style.display = "none";
+            }
+        }
+        //Gestion de l'input qui permet de récupérer l'image d'un nouveau projet à ajouter
+        const pictureInputElement = document.getElementById("picture-input");
+        pictureInputElement.addEventListener("change", () => {
+            console.log("Name : "+pictureInputElement.files[0].name);
+            console.log("Size : "+pictureInputElement.files[0].size);
+            const pictureOverviewElement = document.querySelector(".picture-overview");
+
+            root.workPicture.src = window.URL.createObjectURL(pictureInputElement.files[0]);
+            
+            pictureElement.style.display = "none";
+            addImageButtonElement.style.display = "none";
+            pElement.style.display = "none";
+
+            root.workPicture.style.display = "block";
+            root.workPicture.style.width = "auto";
+            root.workPicture.style.height = "100%";
+
+            pictureOverviewElement.style.padding = "0px 0px 0px 0px";
+            pictureOverviewElement.style.height = "178px";
+            pictureOverviewElement.appendChild(root.workPicture);
+            
+        });
+
+
+        const worksModifyButton = document.querySelector(".works-modify-button");
+        worksModifyButton.addEventListener("click", function () {
+            root.worksManageModal.style.display = "block";
+        });
+
+        const worksManageCloseButton = document.querySelector(".works-manage .close-button");
+        worksManageCloseButton.addEventListener("click", function () {
+            root.worksManageModal.style.display = "none";
+        });
+
+        const workSendForm = document.querySelector("#works-send-form");
+        workSendForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            await fetch("http://localhost:5678/api/works", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer "+window.localStorage.getItem("token"),
+                },
+                body: formData,
+            })
+            .then((response) => {
+                if (response.redirected) {
+                    console.log("redirection : "+response.url);
                 }
-            }
-            //Gestion de l'input qui permet de récupérer l'image d'un nouveau projet à ajouter
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                if (data.error) {
+                    alert(data.error);
+                }
+            })
+            const galleryClass = document.querySelector(".gallery");
+            let response = await fetch("http://localhost:5678/api/works");
+            let json = await response.json();
+            showWork(galleryClass, json[json.length-1]);
+            
+            root.worksAddModal.style.display = "none";
+            root.workPicture.style.display = "none";
+        });
+
+        function resetAddWorkForm() {
             const pictureInputElement = document.getElementById("picture-input");
-            pictureInputElement.addEventListener("change", () => {
-                console.log("Name : "+pictureInputElement.files[0].name);
-                console.log("Size : "+pictureInputElement.files[0].size);
-                console.log(window.URL.createObjectURL(pictureInputElement.files[0]));
-                const pictureOverviewElement = document.querySelector(".picture-overview");
-
-                root.workPicture.src = window.URL.createObjectURL(pictureInputElement.files[0]);
-                
-                pictureElement.style.display = "none";
-                addImageButtonElement.style.display = "none";
-                pElement.style.display = "none";
-
-                root.workPicture.style.display = "block";
-                root.workPicture.style.width = "auto";
-                root.workPicture.style.height = "100%";
-
-                pictureOverviewElement.style.padding = "0px 0px 0px 0px";
-                pictureOverviewElement.style.height = "178px";
-                pictureOverviewElement.appendChild(root.workPicture);
-                
-            });
-            function resetAddWorkForm() {
-                const pictureInputElement = document.getElementById("picture-input");
-                const workTitle = document.getElementById("work-title");
-                const workCategory = document.getElementById("work-category");
-                pictureInputElement.value = "";
-                workTitle.value = "";
-                workCategory.getElementsByTagName('option')[0].selected = 'selected'
-            }
-            //mise à jour de la liste des projets des projets
-            worksUpdate();
-        })();
+            const workTitle = document.getElementById("work-title");
+            const workCategory = document.getElementById("work-category");
+            pictureInputElement.value = "";
+            workTitle.value = "";
+            workCategory.getElementsByTagName('option')[0].selected = 'selected'
+        }
+        //mise à jour de la liste des projets des projets
+        worksUpdate();
+    })();
 
     async function worksUpdate() {
         const json = await fetch("http://localhost:5678/api/works")
         .then((response) => {
             if (!response.ok)
-                console.log("Erreur lors de la récupération des données")
+                console.log("Erreur lors de la récupération des projets")
                 return false;
         })
         root.Works_JSON = json;
@@ -409,22 +454,15 @@
             worksModifyButton.addEventListener("click", function () {
                 root.worksManageModal.style.display = "block";
             });
-            const worksModifyCloseButton = document.querySelector(".works-manage .close-button");
-            worksModifyCloseButton.addEventListener("click", function () {
+            const worksManageCloseButton = document.querySelector(".works-manage .close-button");
+            worksManageCloseButton.addEventListener("click", function () {
                 root.worksManageModal.style.display = "none";
             });
 
-            const worksSendButton = document.querySelector(".works-add .send-button");
-
-            const pictureInputElement = document.getElementById("picture-input");
-            const worksSendForm = document.querySelector("#works-send-form");
-            
-            let workPicture = document.querySelector("#works-add #work-picture");
-            let workTitle = document.querySelector("#works-add #work-title");
-            let workCategory = document.querySelector("#works-add #work-category");
+            const workSendForm = document.querySelector("#works-send-form");
 
             //Nouvelle version
-            worksSendForm.addEventListener("submit", async (event) => {
+            workSendForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
 
                 const formData = new FormData(event.target);
@@ -452,20 +490,12 @@
                 let response = await fetch("http://localhost:5678/api/works");
                 let json = await response.json();
                 showWork(galleryClass, json[json.length-1]);
-                //workPicture.removeAttribute('src');
+                
                 root.worksAddModal.style.display = "none";
                 root.workPicture.style.display = "none";
-                //worksSendForm.reset();
             });
-
-        },
-        open: function () {
-
-        },
-        close: function () {
 
         }
     };
-    this.editor.init();
 
 })();
