@@ -1,11 +1,9 @@
-/*** affichage dynamique du contenu du site ***/
-
 (async function script() {
     console.log("Execution du script principal")
     //racine du script
     const root = this;
-    this.Works_JSON = null;
-    this.Categories_JSON = null;
+    root.Works_JSON = null;
+    root.Categories_JSON = null;
 
     //Récupération des catégories sur le serveur    
     const CATEGORIES_RESPONSE = await fetch("http://localhost:5678/api/categories");
@@ -15,53 +13,49 @@
     const WORKS_RESPONSE = await fetch("http://localhost:5678/api/works");
     let WORKS_JSON = await WORKS_RESPONSE.json();
  
-    //déclaration d'un pointeur sur la barre de filtre
-    const filterbar = document.querySelector(".filterbar");
+    //pointeur sur la barre de filtre
+    const FILTERBAR_ELEMENT = document.querySelector(".filterbar");
+
+    //pointeur sur la galerie
+    const GALLERY_ELEMENT = document.querySelector(".gallery");
+
+    //pointeur sur l'apercu de la galerie en mode éditeur
+    const WORKS_OVERVIEW_ELEMENT = document.querySelector(".works-manage .overview");
+
     this.worksManageModal = document.getElementById("works-manage");
     this.worksAddModal = document.getElementById("works-add");
 
     this.workPicture = document.querySelector("#works-add #work-picture");
 
-    //ajout des catégories dans la barre de filtre
-    showCategories(filterbar);
+    console.log("Ajout des catégories");
+    appendCategories();
+    console.log("Ajout des projets");
+    appendWorks();
 
-    //affiche les projets dans la galerie par catégories
-    showWorks(WORKS_JSON, 0); //0 = tous
-
     //ajout des catégories dans la barre de filtre
-    function showCategories(filterbar) {
-        
-        //ajout des catégories dans la barre de filtre
-        showCategory(filterbar, {id: 0, name: 'Tous'});
-        let i = 0;
-        while (i < CATEGORIES_JSON.length) {
-            showCategory(filterbar, CATEGORIES_JSON[i]);
-            i++;
+    function appendCategories() {
+        appendCategory({id: 0, name: 'Tous'});
+        for (let i = 0; i < CATEGORIES_JSON.length; i++) {
+            appendCategory(CATEGORIES_JSON[i]);
+            console.log("=> "+CATEGORIES_JSON[i]);
         };
-
     };
 
-    //ajout des projets dans la galerie par catégories
-    function showWorks(worksJson, categoryId = 0) {
-
-        //déclaration d'un pointeur sur la galerie
-        const galleryClass = document.querySelector(".gallery");
-
-        //reinitialisation de la galerie
-        galleryClass.innerHTML = "";
-
-        //affichage des projets dans la galerie
-        i = 0;
-        while (i < worksJson.length) {
-            if (worksJson[i].category.id == categoryId || categoryId == 0) {
-                showWork(galleryClass, worksJson[i]);
-            }
-            i++;
+    //ajout des projets dans la galerie
+    function appendWorks(categoryId = 0) {
+        console.log("=> "+WORKS_JSON.length);
+        GALLERY_ELEMENT.innerHTML = "";
+        WORKS_OVERVIEW_ELEMENT.innerHTML = "";
+        for (let i = 0; i < WORKS_JSON.length; i++) {
+            if (WORKS_JSON[i].category.id == categoryId || categoryId == 0) {
+                appendWork(WORKS_JSON[i]);
+                console.log("=> "+WORKS_JSON[i]);
+            };
         };
     };
 
     //fonction permettant l'ajout d'une catégorie
-    function showCategory(filterbar, category) {
+    function appendCategory(category) {
         //déclaration des éléments à ajouter
         let pElement = document.createElement("p");
         let divElement = document.createElement("div");
@@ -70,16 +64,16 @@
         pElement.innerHTML = category.name;
         divElement.className = "button";
         divElement.addEventListener("click",  () => {
-            showWorks(WORKS_JSON, category.id);
+            appendWorks(category.id);
         });
 
-        //ajout des éléments dans la barre de catégorie
+        //ajout des éléments dans FILTERBAR_ELEMENT
         divElement.appendChild(pElement);
-        filterbar.appendChild(divElement);
+        FILTERBAR_ELEMENT.appendChild(divElement);
 
+        //ajout des catégories dans le l'élément select du formulaire works-send-form
         let categoriesSelectElement = document.getElementById("work-category");
         let optionElement = document.createElement("option");
-
         if (category.name != "Tous") {
             optionElement.value = category.id;
             optionElement.innerHTML = category.name;
@@ -88,8 +82,7 @@
     };
 
     //fonction permettant l'ajout d'un projet dans la galerie
-    function showWork(gallery, work) {
-        
+    function appendWork(work) {
         //déclaration des éléments à ajouter dans la galerie
         let figureElement = document.createElement("figure");
         let imageElement = document.createElement("img");
@@ -100,12 +93,12 @@
         imageElement.alt = work.title;
         figcaptionElement.innerHTML = work.title;
 
-        //ajout des éléments image et figcaption dans l'élément figure
+        //ajout de imageElement et figcaptionElement dans figureElement
         figureElement.appendChild(imageElement);
         figureElement.appendChild(figcaptionElement);
 
-        //ajout des éléments dans la galerie
-        gallery.appendChild(figureElement);
+        //ajout des éléments dans GALLERY_ELEMENT
+        GALLERY_ELEMENT.appendChild(figureElement);
 
         //création des éléments qui serviront à la gestion des projets
         let figureOverviewElement = document.createElement("figure");
@@ -116,7 +109,7 @@
         imageOverviewElement.src = work.imageUrl;
         imageOverviewElement.alt = work.title;
         deleteButtonElement.className = "deleteButton";
-        deleteButtonElement.src = "./assets/icons/delete.png";
+        deleteButtonElement.src = "./assets/icons/trash.png";
         deleteButtonElement.alt = "x";
         deleteButtonElement.style.position = "absolute";
         deleteButtonElement.style.top = "5px";
@@ -124,30 +117,28 @@
         deleteButtonElement.style.cursor = "pointer";
         deleteButtonElement.style.zIndex = "1";
 
-        /*** checked ***/
-        //Ajout d'un bouton de suppression sur l'image du projet
+        //Ajout d'un évènement click sur deleteButtonElement pour la supression du projet
         deleteButtonElement.addEventListener("click", async () => {
-            await fetch("http://localhost:5678/api/works/"+work.id, { //suppression du projet sur le serveur
+            await fetch("http://localhost:5678/api/works/"+work.id, { //demande de suppression du projet sur le serveur
                 method: "DELETE",
                 headers: {
                     "Authorization": "Bearer "+window.localStorage.getItem("token"),
                 }
             })
             .then((response) => {
-                if (response.ok) { //si la suppression est confirmé alors on valide la suppression sur le DOM
+                if (response.ok) { //si la suppression est confirmée, on supprime le projet du DOM
                     figureElement.remove();
                     figureOverviewElement.remove();
-                } else { //on retourne false si ce n'est pas confirmé
+                } else {
                     return false;
                 }
             })
         });
-        /*** checked ***/
         
-        const worksOverviewElement = document.querySelector(".works-manage .overview");
+        //Ajout de imageOverviewElement et deleteButtonElement dans worksOverviewElement pour la gestion des projets
         figureOverviewElement.appendChild(imageOverviewElement);
         figureOverviewElement.appendChild(deleteButtonElement);
-        worksOverviewElement.appendChild(figureOverviewElement);
+        WORKS_OVERVIEW_ELEMENT.appendChild(figureOverviewElement);
     };
 
     (function worksManage() {
@@ -250,10 +241,9 @@
                     alert(data.error);
                 }
             })
-            const galleryClass = document.querySelector(".gallery");
             let response = await fetch("http://localhost:5678/api/works");
             let json = await response.json();
-            showWork(galleryClass, json[json.length-1]);
+            appendWork(json[json.length-1]);
             
             root.worksAddModal.style.display = "none";
             root.workPicture.style.display = "none";
@@ -345,22 +335,20 @@
             loginSectionElement.style.display = "block";
         },
         editorShow: function() {
-            const filterbarElement = document.querySelector(".filterbar");
             const editorBarElement = document.querySelector(".editor-bar");
             const worksModifyButtonElement = document.querySelector(".works-modify-button");
             const headerBarElement = document.querySelector(".header-bar");
-            filterbarElement.style.display = "none";
+            FILTERBAR_ELEMENT.style.display = "none";
             editorBarElement.style.display = "flex";
             worksModifyButtonElement.style.display = "flex";
             headerBarElement.style.margin = "80px 0px 50px 0px";
             
         },
         editorHide: function() {
-            const filterbarElement = document.querySelector(".filterbar");
             const editorBarElement = document.querySelector(".editor-bar");
             const worksModifyButtonElement = document.querySelector(".works-modify-button");
             const headerBarElement = document.querySelector(".header-bar");
-            filterbarElement.style.display = "flex";
+            FILTERBAR_ELEMENT.style.display = "flex";
             editorBarElement.style.display = "none";
             worksModifyButtonElement.style.display = "none";
             headerBarElement.style.margin = "30px 0px 50px 0px";
@@ -486,10 +474,9 @@
                         alert(data.error);
                     }
                 })
-                const galleryClass = document.querySelector(".gallery");
                 let response = await fetch("http://localhost:5678/api/works");
                 let json = await response.json();
-                showWork(galleryClass, json[json.length-1]);
+                appendWork(json[json.length-1]);
                 
                 root.worksAddModal.style.display = "none";
                 root.workPicture.style.display = "none";
