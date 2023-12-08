@@ -194,7 +194,7 @@ a:hover {
 	border-radius: 42px;
 	border: 1px solid;
 
-	cursor: default;
+	cursor: pointer;
 }
 
 .filterbar .button:hover {

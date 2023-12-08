@@ -141,6 +141,7 @@
         WORKS_OVERVIEW_ELEMENT.appendChild(figureOverviewElement);
     };
 
+    //fonction de gestion et d'ajout de projet
     (function worksManage() {
         const addButtonElement = document.querySelector(".works-manage .add-button");
         const previousButtonElement = document.querySelector(".works-add .previous-button");
@@ -185,24 +186,32 @@
         //Gestion de l'input qui permet de récupérer l'image d'un nouveau projet à ajouter
         const pictureInputElement = document.getElementById("picture-input");
         pictureInputElement.addEventListener("change", () => {
-            console.log("Name : "+pictureInputElement.files[0].name);
-            console.log("Size : "+pictureInputElement.files[0].size);
-            const pictureOverviewElement = document.querySelector(".picture-overview");
+            if (pictureInputElement.files[0]) {
+                if (pictureInputElement.files[0].size / 1048576 < 1) {
+                    console.log("Name : "+pictureInputElement.files[0].name);
+                    console.log("Size : "+pictureInputElement.files[0].size);
+                    const pictureOverviewElement = document.querySelector(".picture-overview");
 
-            root.workPicture.src = window.URL.createObjectURL(pictureInputElement.files[0]);
-            
-            pictureElement.style.display = "none";
-            addImageButtonElement.style.display = "none";
-            pElement.style.display = "none";
+                    root.workPicture.src = window.URL.createObjectURL(pictureInputElement.files[0]);
+                    
+                    pictureElement.style.display = "none";
+                    addImageButtonElement.style.display = "none";
+                    pElement.style.display = "none";
 
-            root.workPicture.style.display = "block";
-            root.workPicture.style.width = "auto";
-            root.workPicture.style.height = "100%";
+                    root.workPicture.style.display = "block";
+                    root.workPicture.style.width = "auto";
+                    root.workPicture.style.height = "100%";
 
-            pictureOverviewElement.style.padding = "0px 0px 0px 0px";
-            pictureOverviewElement.style.height = "178px";
-            pictureOverviewElement.appendChild(root.workPicture);
-            
+                    pictureOverviewElement.style.padding = "0px 0px 0px 0px";
+                    pictureOverviewElement.style.height = "178px";
+                    pictureOverviewElement.appendChild(root.workPicture);
+                } else {
+                    pictureInputElement.value = "";
+                    window.alert("L'image doit faire moins de 4mo");
+                }
+            } else {
+                window.alert("Veuillez choisir une image pour le projet"); 
+            }           
         });
 
 
@@ -217,10 +226,11 @@
         });
 
         const workSendForm = document.querySelector("#works-send-form");
-        workSendForm.addEventListener("submit", async (event) => {
+        workSendForm.addEventListener("submit", async (event) => { //Gestion du formulaire d'ajout de projet
             event.preventDefault();
 
             const formData = new FormData(event.target);
+            let state = 0;
 
             await fetch("http://localhost:5678/api/works", {
                 method: "POST",
@@ -230,25 +240,32 @@
                 body: formData,
             })
             .then((response) => {
-                if (response.redirected) {
-                    console.log("redirection : "+response.url);
-                }
+                state++;
                 return response.json();
             })
             .then((data) => {
                 console.log(data);
                 if (data.error) {
-                    alert(data.error);
+                    state++;
                 }
             })
-            let response = await fetch("http://localhost:5678/api/works");
-            let json = await response.json();
-            appendWork(json[json.length-1]);
+            if (state == 1) {
+                let response = await fetch("http://localhost:5678/api/works");
+                let json = await response.json();
+                appendWork(json[json.length-1]);
+                root.worksAddModal.style.display = "none"; //
+                root.workPicture.style.display = "none"; 
+                state = 0;
+                window.alert("Le projet a bien été ajouté");
+            } else {
+                root.worksAddModal.style.display = "block"; //
+                root.workPicture.style.display = "none"; 
+                window.alert("Veuillez choisir une image pour le projet"); //alert(data.error);
+            }
             
-            root.worksAddModal.style.display = "none";
-            root.workPicture.style.display = "none";
         });
 
+        //Function de réinitialisation du formulaire d'ajout de projet
         function resetAddWorkForm() {
             const pictureInputElement = document.getElementById("picture-input");
             const workTitle = document.getElementById("work-title");
@@ -261,6 +278,7 @@
         worksUpdate();
     })();
 
+    //Function permettant la mise à jour des projets
     async function worksUpdate() {
         const json = await fetch("http://localhost:5678/api/works")
         .then((response) => {
@@ -271,22 +289,7 @@
         root.Works_JSON = json;
     }
 
-    this.categories = {
-        init: async function () {
-            await this.update();
-        },
-        update: async function () {
-            //récupération des catégories sur le serveur    
-            let response = await fetch("http://localhost:5678/api/categories");
-            if (!response.ok)
-                return false;
-            root.Categories_JSON = await response.json();
-            return true;
-        }
-    };
-
-    await root.categories.init();
-
+    //Objet permettant de gérer les différents du site
     this.menu = {
         init: function () {
 
@@ -306,8 +309,7 @@
                 this.worksShow();
             });
         },
-        worksShow: function () {
-            //récupération des éléments de page
+        worksShow: function () { //Affichage de la galerie
             const footerElement = document.querySelector("footer");
             const loginSectionElement = document.querySelector("#login");
             const introductionElement = document.querySelector("#introduction");
@@ -320,8 +322,7 @@
             contactElement.style.display = "block";
             loginSectionElement.style.display = "none";
         },
-        loginShow: function () {
-            //récupération des éléments de page
+        loginShow: function () { //Affichage de section login
             const footerElement = document.querySelector("footer");
             const loginSectionElement = document.querySelector("#login");
             const introductionElement = document.querySelector("#introduction");
@@ -334,7 +335,7 @@
             contactElement.style.display = "none";
             loginSectionElement.style.display = "block";
         },
-        editorShow: function() {
+        editorShow: function() { //Affichage du mode édition
             const editorBarElement = document.querySelector(".editor-bar");
             const worksModifyButtonElement = document.querySelector(".works-modify-button");
             const headerBarElement = document.querySelector(".header-bar");
@@ -344,7 +345,7 @@
             headerBarElement.style.margin = "80px 0px 50px 0px";
             
         },
-        editorHide: function() {
+        editorHide: function() { //Masquage du mode édition
             const editorBarElement = document.querySelector(".editor-bar");
             const worksModifyButtonElement = document.querySelector(".works-modify-button");
             const headerBarElement = document.querySelector(".header-bar");
@@ -356,6 +357,7 @@
     };
     this.menu.init();
 
+    //Fonction du formulaire de login
     (function login() {
             const loginForm = document.querySelector("#login-form");
             loginForm.addEventListener("submit", async (event) => {
@@ -429,60 +431,7 @@
                         }
                     }
                 })
-                /*.catch((err) => {
-                    //console.log(err);
-                });*/
             });
     })();
-
-    this.editor = {
-        init: function () {
-            root.worksManageModal.style.display = "none";
-            const worksModifyButton = document.querySelector(".works-modify-button");
-            worksModifyButton.addEventListener("click", function () {
-                root.worksManageModal.style.display = "block";
-            });
-            const worksManageCloseButton = document.querySelector(".works-manage .close-button");
-            worksManageCloseButton.addEventListener("click", function () {
-                root.worksManageModal.style.display = "none";
-            });
-
-            const workSendForm = document.querySelector("#works-send-form");
-
-            //Nouvelle version
-            workSendForm.addEventListener("submit", async (event) => {
-                event.preventDefault();
-
-                const formData = new FormData(event.target);
-
-                await fetch("http://localhost:5678/api/works", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer "+window.localStorage.getItem("token"),
-                    },
-                    body: formData,
-                })
-                .then((response) => {
-                    if (response.redirected) {
-                        console.log("redirection : "+response.url);
-                    }
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log(data);
-                    if (data.error) {
-                        alert(data.error);
-                    }
-                })
-                let response = await fetch("http://localhost:5678/api/works");
-                let json = await response.json();
-                appendWork(json[json.length-1]);
-                
-                root.worksAddModal.style.display = "none";
-                root.workPicture.style.display = "none";
-            });
-
-        }
-    };
 
 })();
