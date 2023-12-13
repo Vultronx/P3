@@ -194,7 +194,7 @@ a:hover {
 	border-radius: 42px;
 	border: 1px solid;
 
-	cursor: default;
+	cursor: pointer;
 }
 
 .filterbar .button:hover {
@@ -444,6 +444,7 @@ footer nav ul {
 .modal .content .overview {
 	width: auto;
 	display: grid;
+	margin-top: 30px;
 	margin-left: 70px;
 	margin-right: 70px;
 	padding-bottom: 70px;

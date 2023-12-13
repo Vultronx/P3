@@ -1,0 +1,5 @@
+Accessibilité :
+l'accès au éléments de la page avec le clavier
+
+Visuel:
+changer les éléments provisoires par les icones prévus
